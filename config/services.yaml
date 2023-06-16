@@ -1,0 +1,34 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    currency_exchange_rates.api: '%env(CURRENCY_EXCHANGE_RATES_API)%'
+services:
+    App\Wallet\Application\Service\DepositRule: ~
+    Symfony\Component\HttpFoundation\Session\Session: ~
+
+    App\Wallet\Application\Service\CalculateFeeInterface $calculateFee: '@App\Wallet\Application\Service\DepositRule'
+    Symfony\Component\HttpFoundation\Session\SessionInterface $session: '@Symfony\Component\HttpFoundation\Session\Session'
+
+    App\Blog\Post\Article\Application\Service\CalculateFeeCommandHandler:
+        tags:
+            - messenger.message_handler
+
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
